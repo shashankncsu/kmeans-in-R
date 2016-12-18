@@ -1,0 +1,45 @@
+#Euclidean distance
+euclid = function(ktest, centres) {
+  distanceMatrix = matrix(NA, nrow=dim(ktest)[1], ncol=dim(centers)[1])
+  for(i in 1:nrow(centers)) {
+    distanceMatrix[,i] = sqrt(rowSums(t(t(ktest)-centers[i,])^2))
+  }
+  return(distanceMatrix)
+}
+
+
+
+# Function to calculate sum of square errors
+sse = function(ktest, centers,clusters) 
+{
+  ktest=cbind(ktest,clusters)
+  ktestdf=as.data.frame(ktest)
+  d=split(ktestdf,clusters)
+  d=lapply(d,function(x) x[,-ncol(x)])
+  s=list()
+  for(i in 1:nrow(centers)) {
+     s[[i]]=rowSums(t(t(d[[i]])-centers[i,])^2)
+  }
+  s=sum(unlist(s))
+  return(s)
+}
+
+
+
+
+#Kmeans function that takes in the test data set and the initial number of centers. 
+K_means = function(ktest, centers){
+ 
+  repeat {
+    distsToCenters = euclid(ktest, centers)
+    clusters = apply(distsToCenters, 1, which.min)
+    centers = apply(ktest, 2, tapply, clusters, mean)
+    err=sse(ktest,centers,clusters)
+    err1=err
+    if(err1>=err){
+      break}
+  }
+      
+    ans=list(err,centers,clusters)
+  return(ans)
+}
